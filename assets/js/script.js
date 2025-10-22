@@ -79,12 +79,18 @@ var typed = new Typed(".typing-text", {
 });
 // <!-- typed js effect ends -->
 
+// Resolve URLs relative to repository root irrespective of deploy subpath
+const __SCRIPT_BASE__ = new URL('./', document.currentScript.src);
+const __ROOT_BASE__ = new URL('../../', document.currentScript.src);
+function urlFromRoot(path) { return new URL(path, __ROOT_BASE__).toString(); }
+
 async function fetchData(type = "skills") {
-    let response
-    type === "skills" ?
-        response = await fetch("skills.json")
-        :
-        response = await fetch("./projects/projects.json")
+    let response;
+    if (type === "skills") {
+        response = await fetch(urlFromRoot("skills.json"));
+    } else {
+        response = await fetch(urlFromRoot("projects/projects.json"));
+    }
     const data = await response.json();
     return data;
 }
@@ -108,9 +114,11 @@ function showProjects(projects) {
     let projectsContainer = document.querySelector("#work .box-container");
     let projectHTML = "";
     projects.slice(0, 10).filter(project => project.category != "android").forEach(project => {
+        const imgPng = urlFromRoot(`assets/images/projects/${project.image}.png`);
+        const imgPNG = urlFromRoot(`assets/images/projects/${project.image}.PNG`);
         projectHTML += `
         <div class="box tilt">
-      <img draggable="false" src="/assets/images/projects/${project.image}.png" alt="project" />
+      <img draggable="false" src="${imgPng}" onerror="this.onerror=null;this.src='${imgPNG}';" alt="project" />
       <div class="content">
         <div class="tag">
         <h3>${project.name}</h3>
